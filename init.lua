@@ -128,6 +128,11 @@ require('lazy').setup({
     end,
   },
 
+  {
+    'akinsho/bufferline.nvim', 
+    dependencies = { 'nvim-tree/nvim-web-devicons' }
+  },
+
   { -- Set lualine as statusline
     'nvim-lualine/lualine.nvim',
     -- See `:help lualine.txt`
@@ -303,6 +308,7 @@ vim.api.nvim_set_keymap('n', "<leader>nt", ":NvimTreeToggle<cr>" ,{silent = true
 vim.api.nvim_set_keymap('n', "<leader>nf", ":NvimTreeFindFile<cr>" ,{silent = true, noremap = true})
 require("nvim-tree").setup({})
 
+require("bufferline").setup{}
 -- [[ Configure Treesitter ]]
 -- See `:help nvim-treesitter`
 require('nvim-treesitter.configs').setup {
