@@ -140,9 +140,8 @@ require('lazy').setup({
     'lukas-reineke/indent-blankline.nvim',
     -- Enable `lukas-reineke/indent-blankline.nvim`
     -- See `:help indent_blankline.txt`
-    opts = {
-      show_trailing_blankline_indent = false,
-    },
+    main = "ibl",
+    opts = {}
   },
 
   -- "gc" to comment visual regions/lines
@@ -178,6 +177,18 @@ require('lazy').setup({
     'nvim-treesitter/playground'
   },
 
+  {
+    'windwp/nvim-autopairs',
+    config = function() require("nvim-autopairs").setup {} end
+  },
+  {
+    "zbirenbaum/copilot.lua",
+    cmd = "Copilot",
+    event = "InsertEnter",
+    config = function()
+      require("copilot").setup({})
+    end,
+  },
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
   --       Uncomment any of the lines below to enable them.
@@ -296,8 +307,11 @@ vim.keymap.set('n', '<leader>sw', require('telescope.builtin').grep_string, { de
 vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, { desc = '[S]earch by [G]rep' })
 vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
 
-vim.api.nvim_set_keymap('n', "<leader>nt", ":NvimTreeToggle<cr>" ,{silent = true, noremap = true})
-vim.api.nvim_set_keymap('n', "<leader>nf", ":NvimTreeFindFile<cr>" ,{silent = true, noremap = true})
+vim.keymap.set('n', "<leader>nt", ":NvimTreeToggle<cr>" ,{silent = true, noremap = true})
+vim.keymap.set('n', "<leader>nf", ":NvimTreeFindFile<cr>" ,{silent = true, noremap = true})
+
+vim.keymap.set('n', "<leader>bn", ":BufferLineCycleNext<cr>" ,{silent = true, noremap = true})
+vim.keymap.set('n', "<leader>bp", ":BufferLineCyclePrev<cr>" ,{silent = true, noremap = true})
 require("nvim-tree").setup({})
 
 require("bufferline").setup{}
@@ -457,6 +471,9 @@ local servers = {
   },
 }
 
+--Setup indent-blankline
+require("ibl").setup()
+
 -- Setup neovim lua configuration
 require('neodev').setup()
 
@@ -485,6 +502,9 @@ mason_lspconfig.setup_handlers {
 
   ["eslint"] = function()
     require('lspconfig').eslint.setup {
+      settings = {
+        autoFixOnSave = true,
+      },
       on_attach = function(_, bufnr)
         vim.api.nvim_create_autocmd("BufWritePre", {
           buffer = bufnr,
@@ -534,7 +554,7 @@ cmp.setup {
     end, { 'i', 's' }),
   },
   sources = {
-    { name = 'nvim_lsp' },
+    { name = 'nvim_lsp', max_item_count = 8 },
     { name = 'luasnip' },
   },
 }
