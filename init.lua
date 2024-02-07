@@ -97,7 +97,7 @@ require('lazy').setup({
   },
 
   -- Useful plugin to show you pending keybinds.
-  { 'folke/which-key.nvim', opts = {} },
+  { 'folke/which-key.nvim',          opts = {} },
   { -- Adds git releated signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
   },
@@ -119,7 +119,7 @@ require('lazy').setup({
   },
 
   {
-    'akinsho/bufferline.nvim', 
+    'akinsho/bufferline.nvim',
     dependencies = { 'nvim-tree/nvim-web-devicons' }
   },
 
@@ -145,7 +145,7 @@ require('lazy').setup({
   },
 
   -- "gc" to comment visual regions/lines
-  { 'numToStr/Comment.nvim', opts = {} },
+  { 'numToStr/Comment.nvim',         opts = {} },
 
   -- Fuzzy Finder (files, lsp, etc)
   { 'nvim-telescope/telescope.nvim', version = '*', dependencies = { 'nvim-lua/plenary.nvim' } },
@@ -188,6 +188,19 @@ require('lazy').setup({
     config = function()
       require("copilot").setup({})
     end,
+  },
+  {
+    "nvimtools/none-ls.nvim",
+    config = function()
+      local null_ls = require("null-ls")
+      null_ls.setup({
+        sources = {
+          null_ls.builtins.formatting.prettier,
+          null_ls.builtins.diagnostics.eslint_d
+        }
+      })
+      vim.keymap.set("n", "<leader>gf", vim.lsp.buf.format, { desc = "Format Document" })
+    end
   },
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
@@ -311,14 +324,14 @@ vim.keymap.set('n', '<leader>sw', require('telescope.builtin').grep_string, { de
 vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, { desc = '[S]earch by [G]rep' })
 vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
 
-vim.keymap.set('n', "<leader>nt", ":NvimTreeToggle<cr>" ,{silent = true, noremap = true})
-vim.keymap.set('n', "<leader>nf", ":NvimTreeFindFile<cr>" ,{silent = true, noremap = true})
+vim.keymap.set('n', "<leader>nt", ":NvimTreeToggle<cr>", { silent = true, noremap = true })
+vim.keymap.set('n', "<leader>nf", ":NvimTreeFindFile<cr>", { silent = true, noremap = true })
 
-vim.keymap.set('n', "<leader>bn", ":BufferLineCycleNext<cr>" ,{silent = true, noremap = true})
-vim.keymap.set('n', "<leader>bp", ":BufferLineCyclePrev<cr>" ,{silent = true, noremap = true})
+vim.keymap.set('n', "<leader>bn", ":BufferLineCycleNext<cr>", { silent = true, noremap = true })
+vim.keymap.set('n', "<leader>bp", ":BufferLineCyclePrev<cr>", { silent = true, noremap = true })
 require("nvim-tree").setup({})
 
-require("bufferline").setup{}
+require("bufferline").setup {}
 -- [[ Configure Treesitter ]]
 -- See `:help nvim-treesitter`
 require('nvim-treesitter.configs').setup {
@@ -386,7 +399,7 @@ require('nvim-treesitter.configs').setup {
   playground = {
     enable = true,
     disable = {},
-    updatetime = 25, -- Debounced time for highlighting nodes in the playground from source code
+    updatetime = 25,         -- Debounced time for highlighting nodes in the playground from source code
     persist_queries = false, -- Whether the query persists across vim sessions
     keybindings = {
       toggle_query_editor = 'o',
@@ -418,6 +431,7 @@ local on_attach = function(_, bufnr)
   --
   -- In this case, we create a function that lets us more easily define mappings specific
   -- for LSP related items. It sets the mode, buffer and description for us each time.
+  local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
   local nmap = function(keys, func, desc)
     if desc then
       desc = 'LSP: ' .. desc
@@ -452,6 +466,14 @@ local on_attach = function(_, bufnr)
   vim.api.nvim_buf_create_user_command(bufnr, 'Format', function(_)
     vim.lsp.buf.format()
   end, { desc = 'Format current buffer with LSP' })
+
+  vim.api.nvim_create_autocmd("BufWritePre", {
+    group = augroup,
+    buffer = bufnr,
+    callback = function()
+      vim.lsp.buf.format()
+    end,
+  })
 end
 
 -- Enable the following language servers
@@ -464,8 +486,8 @@ local servers = {
   -- gopls = {},
   -- pyright = {},
   -- rust_analyzer = {},
-  tsserver = {},
-  eslint = {},
+  --tsserver = {},
+  -- eslint = {},
 
   lua_ls = {
     Lua = {
@@ -501,20 +523,6 @@ mason_lspconfig.setup_handlers {
       capabilities = capabilities,
       on_attach = on_attach,
       settings = servers[server_name],
-    }
-  end,
-
-  ["eslint"] = function()
-    require('lspconfig').eslint.setup {
-      settings = {
-        autoFixOnSave = true,
-      },
-      on_attach = function(_, bufnr)
-        vim.api.nvim_create_autocmd("BufWritePre", {
-          buffer = bufnr,
-          command = "EslintFixAll",
-        })
-      end,
     }
   end,
 }
@@ -557,10 +565,12 @@ cmp.setup {
       end
     end, { 'i', 's' }),
   },
-  sources = {
-    { name = 'nvim_lsp', max_item_count = 8 },
+  sources = cmp.config.sources({
+    { name = 'nvim_lsp' },
     { name = 'luasnip' },
-  },
+  }, {
+    { name = 'buffer' }
+  }),
 }
 
 -- The line beneath this is called `modeline`. See `:help modeline`
