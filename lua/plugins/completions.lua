@@ -1,11 +1,11 @@
 return {
   {
-    'hrsh7th/cmp-nvim-lsp', 
+    'hrsh7th/cmp-nvim-lsp',
   },
   {
-    'L3MON4D3/LuaSnip', 
-    dependencies = { 
-      'saadparwaiz1/cmp_luasnip' 
+    'L3MON4D3/LuaSnip',
+    dependencies = {
+      'saadparwaiz1/cmp_luasnip'
     },
   },
   {
@@ -41,7 +41,7 @@ return {
   },
   { -- Autocompletion
     'hrsh7th/nvim-cmp',
-    config = function ()
+    config = function()
       local cmp = require 'cmp'
       local luasnip = require 'luasnip'
 
@@ -56,15 +56,16 @@ return {
         mapping = cmp.mapping.preset.insert {
           ['<C-d>'] = cmp.mapping.scroll_docs(-4),
           ['<C-f>'] = cmp.mapping.scroll_docs(4),
+          ['<C-e>'] = cmp.mapping.abort(),
           ['<C-Space>'] = cmp.mapping.complete {},
           ['<CR>'] = cmp.mapping.confirm {
             behavior = cmp.ConfirmBehavior.Replace,
           },
           ['<Tab>'] = cmp.mapping(function(fallback)
-            if cmp.visible() then
-              cmp.select_next_item()
-            elseif require("copilot.suggestion").is_visible() then
+            if require("copilot.suggestion").is_visible() then
               require("copilot.suggestion").accept()
+            elseif cmp.visible() then
+              cmp.select_next_item()
             elseif luasnip.expand_or_jumpable() then
               luasnip.expand_or_jump()
             else
@@ -85,10 +86,9 @@ return {
           { name = 'nvim_lsp' },
           { name = 'luasnip' },
         }, {
-            { name = 'buffer' }
-          }),
+          { name = 'buffer' }
+        }),
       }
-
     end
   },
   {

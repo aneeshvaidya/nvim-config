@@ -18,13 +18,14 @@ return {
     'lukas-reineke/indent-blankline.nvim',
     -- Enable `lukas-reineke/indent-blankline.nvim`
     -- See `:help indent_blankline.txt`
+    enabled = false,
     main = "ibl",
     opts = {}
   },
   {
     'akinsho/bufferline.nvim',
     dependencies = { 'nvim-tree/nvim-web-devicons' },
-    config = true  
+    config = true
   },
   { -- Set lualine as statusline
     'nvim-lualine/lualine.nvim',
@@ -39,7 +40,6 @@ return {
     },
   },
   -- "gc" to comment visual regions/lines
-  { 'numToStr/Comment.nvim',         opts = {} },
   {
     'windwp/nvim-autopairs',
     config = true,
