@@ -21,6 +21,15 @@ return {
     end
   },
   {
+    "atelierbram/Base2Tone-nvim",
+    lazy = false,
+    enabled = false,
+    priority = 1000,
+    config = function()
+      vim.cmd("colorscheme base2tone_forest_dark")
+    end
+  },
+  {
     "atelierbram/vim-colors_atelier-schemes",
     lazy = false,
     priority = 1000,
