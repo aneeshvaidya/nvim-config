@@ -40,6 +40,9 @@ return {
     end
   },
   {
-    'preservim/vim-pencil'
+    'preservim/vim-pencil',
+    init = function()
+      vim.g["pencil#textwidth"] = 100
+    end,
   }
 }
