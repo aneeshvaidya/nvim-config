@@ -1,93 +1,76 @@
 return {
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
-    dependencies = {
-      'nvim-treesitter/nvim-treesitter-textobjects',
-    },
+    branch = 'main', -- the old master branch is frozen; main is the rewrite
+    build = ':TSUpdate',
+    lazy = false,
     config = function()
-      pcall(require('nvim-treesitter.install').update { with_sync = true })
-
-      require('nvim-treesitter.configs').setup {
-        -- Add languages to be installed here that you want installed for treesitter
-        ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'typescript', 'vim', 'gleam' },
-
-        -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
-        auto_install = false,
-
-        highlight = { enable = true },
-        indent = { enable = true, disable = { 'python' } },
-        incremental_selection = {
-          enable = true,
-          keymaps = {
-            init_selection = '<c-space>',
-            node_incremental = '<c-space>',
-            scope_incremental = '<c-s>',
-            node_decremental = '<M-space>',
-          },
-        },
-        textobjects = {
-          select = {
-            enable = true,
-            lookahead = true, -- Automatically jump forward to textobj, similar to targets.vim
-            keymaps = {
-              -- You can use the capture groups defined in textobjects.scm
-              ['aa'] = '@parameter.outer',
-              ['ia'] = '@parameter.inner',
-              ['af'] = '@function.outer',
-              ['if'] = '@function.inner',
-              ['ac'] = '@class.outer',
-              ['ic'] = '@class.inner',
-            },
-          },
-          move = {
-            enable = true,
-            set_jumps = true, -- whether to set jumps in the jumplist
-            goto_next_start = {
-              [']m'] = '@function.outer',
-              [']]'] = '@class.outer',
-            },
-            goto_next_end = {
-              [']M'] = '@function.outer',
-              [']['] = '@class.outer',
-            },
-            goto_previous_start = {
-              ['[m'] = '@function.outer',
-              ['[['] = '@class.outer',
-            },
-            goto_previous_end = {
-              ['[M'] = '@function.outer',
-              ['[]'] = '@class.outer',
-            },
-          },
-          swap = {
-            enable = true,
-            swap_next = {
-              ['<leader>a'] = '@parameter.inner',
-            },
-            swap_previous = {
-              ['<leader>A'] = '@parameter.inner',
-            },
-          },
-        },
-        playground = {
-          enable = true,
-          disable = {},
-          updatetime = 25,         -- Debounced time for highlighting nodes in the playground from source code
-          persist_queries = false, -- Whether the query persists across vim sessions
-          keybindings = {
-            toggle_query_editor = 'o',
-            toggle_hl_groups = 'i',
-            toggle_injected_languages = 't',
-            toggle_anonymous_nodes = 'a',
-            toggle_language_display = 'I',
-            focus_language = 'f',
-            unfocus_language = 'F',
-            update = 'R',
-            goto_node = '<cr>',
-            show_help = '?',
-          },
-        }
+      -- Parsers to install (async, no-op once installed).
+      -- lua/vim/markdown/c/query also ship bundled with nvim itself.
+      require('nvim-treesitter').install {
+        'c', 'cpp', 'go', 'gleam', 'lua', 'python', 'rust',
+        'tsx', 'typescript', 'vim', 'markdown', 'markdown_inline',
       }
+
+      -- On main, highlighting/indentation are driven by core nvim per buffer.
+      vim.api.nvim_create_autocmd('FileType', {
+        group = vim.api.nvim_create_augroup('treesitter-start', { clear = true }),
+        callback = function(args)
+          -- pcall: filetypes without an installed parser fall back to regex syntax
+          local ok = pcall(vim.treesitter.start, args.buf)
+          if ok and vim.bo[args.buf].filetype ~= 'python' then -- python indent was disabled before
+            vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+          end
+        end,
+      })
     end,
-  }
+  },
+  {
+    'nvim-treesitter/nvim-treesitter-textobjects',
+    branch = 'main',
+    dependencies = { 'nvim-treesitter/nvim-treesitter' },
+    config = function()
+      require('nvim-treesitter-textobjects').setup {
+        select = { lookahead = true }, -- jump forward to nearest textobj, like targets.vim
+        move = { set_jumps = true },   -- add movements to the jumplist
+      }
+
+      local select = require('nvim-treesitter-textobjects.select')
+      local move = require('nvim-treesitter-textobjects.move')
+      local swap = require('nvim-treesitter-textobjects.swap')
+
+      local function sel(lhs, query)
+        vim.keymap.set({ 'x', 'o' }, lhs, function()
+          select.select_textobject(query, 'textobjects')
+        end)
+      end
+      sel('aa', '@parameter.outer')
+      sel('ia', '@parameter.inner')
+      sel('af', '@function.outer')
+      sel('if', '@function.inner')
+      sel('ac', '@class.outer')
+      sel('ic', '@class.inner')
+
+      local function mov(lhs, fn, query)
+        vim.keymap.set({ 'n', 'x', 'o' }, lhs, function()
+          move[fn](query, 'textobjects')
+        end)
+      end
+      mov(']m', 'goto_next_start', '@function.outer')
+      mov(']]', 'goto_next_start', '@class.outer')
+      mov(']M', 'goto_next_end', '@function.outer')
+      mov('][', 'goto_next_end', '@class.outer')
+      mov('[m', 'goto_previous_start', '@function.outer')
+      mov('[[', 'goto_previous_start', '@class.outer')
+      mov('[M', 'goto_previous_end', '@function.outer')
+      mov('[]', 'goto_previous_end', '@class.outer')
+
+      vim.keymap.set('n', '<leader>a', function()
+        swap.swap_next('@parameter.inner')
+      end)
+      vim.keymap.set('n', '<leader>A', function()
+        swap.swap_previous('@parameter.inner')
+      end)
+    end,
+  },
 }
