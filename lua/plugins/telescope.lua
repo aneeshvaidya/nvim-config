@@ -1,20 +1,21 @@
 return {
   {
-    'nvim-telescope/telescope-fzf-native.nvim',
-    -- NOTE: If you are having trouble with this installation,
-    --       refer to the README for telescope-fzf-native for more instructions.
-    build = 'make',
-    cond = function()
-      return vim.fn.executable 'make' == 1
-    end,
-  },
-  {
-    "nvim-telescope/telescope-ui-select.nvim",
-  },
-  { 
-    'nvim-telescope/telescope.nvim', 
-    version = '*', 
-    dependencies = { 'nvim-lua/plenary.nvim' },
+    'nvim-telescope/telescope.nvim',
+    -- No version pin: telescope's last tagged release (0.1.8) is from 2024;
+    -- master is the supported branch for nvim 0.11+.
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      {
+        'nvim-telescope/telescope-fzf-native.nvim',
+        -- NOTE: If you are having trouble with this installation,
+        --       refer to the README for telescope-fzf-native for more instructions.
+        build = 'make',
+        cond = function()
+          return vim.fn.executable 'make' == 1
+        end,
+      },
+      { "nvim-telescope/telescope-ui-select.nvim" },
+    },
     config = function()
       local telescope_actions = require('telescope.actions');
       require('telescope').setup {
@@ -60,6 +61,7 @@ return {
 
 
       require('telescope').load_extension('fzf')
+      require('telescope').load_extension('ui-select')
     end
   },
 }

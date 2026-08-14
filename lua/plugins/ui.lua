@@ -7,7 +7,6 @@ return {
   {
     'nvim-tree/nvim-tree.lua',
     dependencies = { 'nvim-tree/nvim-web-devicons' },
-    tag = 'nightly', -- optional, updated every week. (see issue #1193)
     config = function()
       vim.keymap.set('n', "<leader>nt", ":NvimTreeToggle<cr>", { silent = true, noremap = true })
       vim.keymap.set('n', "<leader>nf", ":NvimTreeFindFile<cr>", { silent = true, noremap = true })
@@ -33,7 +32,7 @@ return {
     opts = {
       options = {
         icons_enabled = false,
-        theme = 'gruvbox-material',
+        theme = 'auto',
         component_separators = '|',
         section_separators = '',
       },
