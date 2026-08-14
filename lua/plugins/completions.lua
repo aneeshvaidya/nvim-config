@@ -1,68 +1,29 @@
 return {
   {
-    'hrsh7th/cmp-nvim-lsp',
-  },
-  {
-    'L3MON4D3/LuaSnip',
-    dependencies = {
-      'saadparwaiz1/cmp_luasnip'
-    },
-  },
-  {
     "supermaven-inc/supermaven-nvim",
     opts = {},
   },
   { -- Autocompletion
-    'hrsh7th/nvim-cmp',
-    config = function()
-      local cmp = require 'cmp'
-      local luasnip = require 'luasnip'
-
-      luasnip.config.setup {}
-
-      cmp.setup {
-        snippet = {
-          expand = function(args)
-            luasnip.lsp_expand(args.body)
-          end,
-        },
-        mapping = cmp.mapping.preset.insert {
-          ['<C-d>'] = cmp.mapping.scroll_docs(-4),
-          ['<C-f>'] = cmp.mapping.scroll_docs(4),
-          ['<C-e>'] = cmp.mapping.abort(),
-          ['<C-Space>'] = cmp.mapping.complete {},
-          ['<CR>'] = cmp.mapping.confirm {
-            behavior = cmp.ConfirmBehavior.Replace,
-          },
-          ['<Tab>'] = cmp.mapping(function(fallback)
-            -- if require("copilot.suggestion").is_visible() then
-            --   require("copilot.suggestion").accept()
-            if cmp.visible() then
-              cmp.select_next_item()
-            elseif luasnip.expand_or_jumpable() then
-              luasnip.expand_or_jump()
-            else
-              fallback()
-            end
-          end, { 'i', 's' }),
-          ['<S-Tab>'] = cmp.mapping(function(fallback)
-            if cmp.visible() then
-              cmp.select_prev_item()
-            elseif luasnip.jumpable(-1) then
-              luasnip.jump(-1)
-            else
-              fallback()
-            end
-          end, { 'i', 's' }),
-        },
-        sources = cmp.config.sources({
-          { name = 'nvim_lsp' },
-          { name = 'luasnip' }
-          -- { name = 'codieum' }
-        }, {
-          { name = 'buffer' }
-        }),
-      }
-    end
+    'saghen/blink.cmp',
+    version = '1.*', -- release tag pulls the prebuilt Rust fuzzy matcher
+    event = 'InsertEnter',
+    opts = {
+      keymap = {
+        -- 'enter' preset: <CR> confirms, <C-space> opens menu/docs, <C-e> hides
+        preset = 'enter',
+        -- match the old nvim-cmp muscle memory
+        ['<Tab>'] = { 'select_next', 'snippet_forward', 'fallback' },
+        ['<S-Tab>'] = { 'select_prev', 'snippet_backward', 'fallback' },
+        ['<C-d>'] = { 'scroll_documentation_up', 'fallback' },
+        ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
+      },
+      completion = {
+        documentation = { auto_show = true },
+      },
+      sources = {
+        default = { 'lsp', 'path', 'snippets', 'buffer' },
+      },
+      fuzzy = { implementation = 'prefer_rust_with_warning' },
+    },
   },
 }
