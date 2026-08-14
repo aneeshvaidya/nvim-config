@@ -2,13 +2,35 @@ return {
   {
     'sainnhe/gruvbox-material',
     lazy = false,
-    enabled = true,
+    enabled = false,
     priority = 1000,
     config = function()
       vim.g.gruvbox_material_background = 'hard'
       vim.g.gruvbox_material_better_perfmance = 1
       vim.g.gruvbox_material_foreground = 'mix'
       vim.cmd("colorscheme gruvbox-material")
+    end,
+  },
+
+  {
+    "idr4n/github-monochrome.nvim",
+    lazy = false,
+    priority = 1000,
+    enabled = false,
+    opts = {},
+    config = function()
+      -- require("koda").setup({ transparent = true })
+      vim.cmd("colorscheme github-monochrome-dark")
+    end,
+  },
+  {
+    "oskarnurm/koda.nvim",
+    lazy = false,    -- make sure we load this during startup if it is your main colorscheme
+    enabled = false,
+    priority = 1000, -- make sure to load this before all the other start plugins
+    config = function()
+      -- require("koda").setup({ transparent = true })
+      vim.cmd("colorscheme koda")
     end,
   },
   {
@@ -33,7 +55,7 @@ return {
     "atelierbram/vim-colors_atelier-schemes",
     lazy = false,
     priority = 1000,
-    enabled = false,
+    enabled = true,
     config = function()
       vim.cmd("colorscheme Atelier_SavannaDark")
     end

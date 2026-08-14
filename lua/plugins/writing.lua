@@ -12,8 +12,13 @@ return {
     "zk-org/zk-nvim",
     config = function()
       require("zk").setup({
-        -- See Setup section below
+        picker = "telescope"
       })
+
+      require("zk.commands").add("ZkDaily", function(options)
+        options = vim.tbl_extend("force", { dir = "daily" }, options or {})
+        require("zk").new(options)
+      end)
     end
   },
   {
@@ -41,6 +46,7 @@ return {
   },
   {
     'preservim/vim-pencil',
+    ft = { 'text', 'txt', 'md', 'markdown' },
     init = function()
       vim.g["pencil#textwidth"] = 100
     end,
